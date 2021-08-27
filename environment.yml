@@ -1,0 +1,21 @@
+name: pointnav-vo
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.7
+  - cmake=3.14.0
+  - numpy
+  - numba
+  - tqdm
+  - tbb
+  - joblib
+  - h5py
+  - pytorch=1.6.0
+  - torchvision=0.7.0
+  - cudatoolkit=10.1
+  - pip
+  - pip:
+    - yacs
+    - lz4
+    - opencv-python

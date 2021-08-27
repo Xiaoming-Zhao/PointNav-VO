@@ -1,0 +1,129 @@
+BASE_TASK_CONFIG_PATH: "configs/point_nav_habitat_challenge_2020.yaml"
+
+# training settings
+ENGINE_NAME: "efficient_ddppo"
+ENV_NAME: "NavRLEnv"
+SENSORS: ["DEPTH_SENSOR", "RGB_SENSOR"]
+NUM_UPDATES: 5000000
+NUM_PROCESSES: 2
+SIMULATOR_GPU_ID: 0
+TORCH_GPU_ID: 0
+
+# logging settings
+LOG_DIR: "train_log"
+LOG_FILE: "train_log/train.log"
+INFO_DIR: "train_log/infos"
+CHECKPOINT_FOLDER: "train_log/checkpoints"
+TENSORBOARD_DIR: "train_log/tb"
+VIDEO_OPTION: []   # choices: ["none", "disk", "tensorboard"], "none" is used for storing image info but not generating video
+VIDEO_DIR: "train_log/videos"
+CHECKPOINT_INTERVAL: 50
+LOG_INTERVAL: 10
+
+# evaluation settings
+EVAL:
+  SPLIT: val
+  TEST_EPISODE_COUNT: -1
+  SAVE_RANKED_IMGS: False
+  RANK_TOP_K: 1
+  RESIZE_TOPDOWN_MAP: False
+  DRAW_SHORTEST_PATH: True
+
+  EVAL_WITH_CKPT: True
+
+  EVAL_CKPT_PATH: "pretrained_ckpts/rl/tune_vo/rl_tune_vo.pth"  # path to the checkpoint you want to evaluate with
+
+
+RESUME_TRAIN: False
+RESUME_STATE_FILE: "resume_train_ckpt.pth"   # path to the checkpoint you want to resume training from
+
+RL:
+  SUCCESS_REWARD: 2.5
+
+  OBS_TRANSFORM: "none"   # choices: ["none", "resize", "resize_crop"]
+  VIS_SIZE_W: 341
+  VIS_SIZE_H: 192
+
+  TUNE_WITH_VO: True
+
+  Policy:
+    name: "resnet_rnn_policy"
+    visual_backbone: "resnet18"
+    rnn_backbone: "LSTM"
+    num_recurrent_layers: 2
+    visual_types: ["depth"]
+
+  PPO:
+    # ppo params
+    clip_param: 0.2
+    ppo_epoch: 1
+    num_mini_batch: 2
+    value_loss_coef: 0.5
+    entropy_coef: 0.01
+    lr: 2.5e-4    # 1e-4 (tune with vo), 2.5e-4 (train from scratch)
+    eps: 1e-5
+    max_grad_norm: 0.2
+    num_steps: 128
+    use_gae: True
+    gamma: 0.99
+    tau: 0.95
+    use_linear_clip_decay: False
+    use_linear_lr_decay: False
+    reward_window_size: 50
+
+    use_normalized_advantage: False
+
+    hidden_size: 512
+
+  DDPPO:
+    sync_frac: 0.6
+    # The PyTorch distributed backend to use
+    # distrib_backend: GLOO
+    distrib_backend: NCCL
+    # Initialize with pretrained weights
+    pretrained: False
+    # Visual encoder backbone
+    pretrained_weights: "pretrained_ckpt.pth"
+    # Initialize just the visual encoder backbone with pretrained weights
+    pretrained_encoder: False
+    # Whether or not the visual encoder backbone will be trained.
+    train_encoder: True
+    # Whether or not to reset the critic linear layer
+    reset_critic: False
+
+VO:
+  USE_VO_MODEL: True
+
+  VO_TYPE: "REGRESS"
+
+  OBS_TRANSFORM: "none"
+  VIS_SIZE_W: 341
+  VIS_SIZE_H: 192
+
+  REGRESS_MODEL:
+    # choices:
+    # [vo_cnn, vo_cnn_rgb, vo_cnn_wider, vo_cnn_deeper,
+    #  vo_cnn_act_embed, vo_cnn_wider_act_embed,
+    #  vo_cnn_rgb_d_dd, vo_cnn_rgb_d_top_down, vo_cnn_rgb_dd_top_down, vo_cnn_d_dd_top_down,
+    #  vo_cnn_rgb_d_dd_top_down]
+    name: "vo_cnn_rgb_d_dd_top_down"
+    visual_backbone: "resnet18"
+    hidden_size: 512
+    visual_type: ["rgb", "depth", "discretized_depth", "top_down_view"]  # choices: ["rgb", "depth", "discretized_depth", "top_down_view"]
+    dropout_p: 0.2
+
+    discretize_depth: "hard"  # choices: ['none', 'hard']
+    discretized_depth_channels: 10
+
+    regress_type: "sep_act"   # choices: ["unified_act", "sep_act"]
+    mode: "det"  # choices: ["rnd", "det"]
+    rnd_mode_n: 10
+    pretrained: True
+    pretrained_type: "rgb_d_dd_top_down_inv_joint"
+    all_pretrained_ckpt: {
+      "rgb_d_dd_top_down_inv_joint": {
+        "forward": "pretrained_ckpts/vo/act_forward.pth",
+        "left": "pretrained_ckpts/vo/act_left_right_inv_joint.pth",
+        "right": "pretrained_ckpts/vo/act_left_right_inv_joint.pth",
+      },
+    }
