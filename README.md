@@ -44,7 +44,7 @@ There was a discrepancy between noises models in CPU and CPU versions which has 
 ### Download Data
 
 We need two datasets to enable running of this repo:
-1. [Gibson scene dataset](https://github.com/StanfordVL/GibsonEnv#database)
+1. [Gibson scene dataset](https://github.com/StanfordVL/GibsonEnv/blob/f474d9e/README.md#database)
 2. [PointGoal Navigation splits](https://github.com/facebookresearch/habitat-lab/blob/d0db1b5/README.md#task-datasets), we need `pointnav_gibson_v2.zip`.
 
 Please follow [Habitat's instruction](https://github.com/facebookresearch/habitat-lab/blob/d0db1b5/README.md#task-datasets) to download them. We assume all data is put under `./dataset` with structure:
@@ -97,7 +97,7 @@ python ${POINTNAV_VO_ROOT}/launch.py \
 --run-type eval \
 --addr 127.0.1.1 \
 --port 8338
-``` 
+```
 
 ## Use VO as a Drop-in Module
 
