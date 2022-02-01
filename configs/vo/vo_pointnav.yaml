@@ -88,7 +88,9 @@ VO:
   
   GEOMETRY:
     loss_inv_weight: 1
-    invariance_types: ["inverse_data_augment_only"]  # choices: ["inverse_data_augment_only", "inverse_joint_train"]
+    # choices: ["inverse_data_augment_only", "inverse_joint_train"]
+    # This can only be set if you want to train turn_left/turn_right.
+    invariance_types: []
 
   DATASET:
     TRAIN_WITH_NOISE: dataset/vo_dataset/train_1000000.h5
